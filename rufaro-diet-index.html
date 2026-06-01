@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rufaro's Diet Plan</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1a3d2b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rufaro's Diet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --m1: #2a5c42; --m1l: #e8f5ee; --m1b: #3a7a58; --m1d: #1a3d2b;
+  --m2: #8b4513; --m2l: #fdf0e6; --m2b: #b5621a; --m2d: #5c2d0a;
+  --m3: #4a2878; --m3l: #f0eafc; --m3b: #7c4daa; --m3d: #2d1550;
+  --cream: #f8f4ef; --white: #fefcf9;
+  --text: #1e1e1e; --muted: #888; --subtle: #bbb;
+  --border: #e4dbd0; --shadow: rgba(0,0,0,.07);
+  --gold: #c8a84b; --gold-l: #fdf6e3;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'DM Sans', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── INSTALL BANNER ── */
+.install-banner {
+  display: none;
+  margin: 10px 16px 0;
+  padding: 11px 14px;
+  background: var(--m1d);
+  color: white;
+  border-radius: 12px;
+  font-size: .78rem;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.install-banner.visible { display: flex; }
+.install-banner-text { flex:1; line-height:1.4; }
+.install-banner-text strong { display:block; font-size:.82rem; margin-bottom:1px; }
+.install-btn {
+  padding: 5px 12px; border-radius: 8px; border: none;
+  background: var(--gold); color: white;
+  font-size: .73rem; font-weight: 600;
+  font-family: var(--font-sans); cursor: pointer;
+}
+
+/* ── HEADER ── */
+.header {
+  position: relative; overflow: hidden;
+  background: var(--m1d); color: white;
+  padding: 32px 20px 24px; text-align: center;
+}
+.header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at 20% 0%, rgba(58,122,88,.5) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 100%, rgba(200,168,75,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.header h1 {
+  font-family: var(--font-serif);
+  font-size: 2rem; font-weight: 600;
+  line-height: 1.1; letter-spacing: -.01em;
+  position: relative;
+}
+
+/* ── NOTIFICATION BANNER ── */
+.notif-banner {
+  margin: 14px 16px 0; padding: 11px 14px;
+  border-radius: 12px; font-size: .78rem;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; border: 1.5px solid transparent;
+  transition: all .2s;
+}
+.notif-banner.off { background: var(--gold-l); border-color: rgba(200,168,75,.4); color: #6b4f1a; }
+.notif-banner.on  { background: var(--m1l); border-color: rgba(42,92,66,.3); color: var(--m1d); }
+.notif-banner.denied { background: #fff4f4; border-color: rgba(200,80,80,.3); color: #7a2020; cursor: default; }
+.notif-banner-icon { font-size: 1.2rem; flex-shrink:0; }
+.notif-banner-text { flex:1; line-height:1.4; }
+.notif-banner-text strong { display:block; font-size:.82rem; margin-bottom:1px; }
+.notif-toggle-btn {
+  padding: 5px 12px; border-radius: 8px; border: none;
+  font-size: .73rem; font-weight: 600; cursor: pointer;
+  font-family: var(--font-sans); transition: all .2s; flex-shrink:0;
+}
+.notif-banner.off .notif-toggle-btn { background: var(--gold); color: white; }
+.notif-banner.on  .notif-toggle-btn { background: #c44; color: white; }
+.notif-banner.denied .notif-toggle-btn { background: #ccc; color: #666; cursor: default; }
+
+/* Notification times */
+.notif-times { display:none; gap:6px; flex-wrap:wrap; padding:10px 16px 0; }
+.notif-times.visible { display:flex; }
+.notif-time-pill {
+  display:flex; align-items:center; gap:5px;
+  padding:5px 11px; border-radius:20px;
+  font-size:.73rem; font-weight:500;
+  background:var(--white); border:1.5px solid var(--border);
+  color:var(--muted); cursor:pointer; transition:all .2s;
+}
+.notif-time-pill.active { background:var(--m1l); border-color:var(--m1); color:var(--m1d); }
+.notif-time-pill input[type=time] {
+  border:none; background:transparent; font-family:var(--font-sans);
+  font-size:.73rem; font-weight:500; color:inherit; cursor:pointer;
+  width:72px; padding:0;
+}
+.notif-time-pill input[type=time]:focus { outline:none; }
+
+/* ── PROGRESS ── */
+.progress-wrap { padding:16px 16px 0; }
+.progress-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+.progress-label { font-size:.73rem; color:var(--muted); font-weight:500; }
+.progress-pct { font-family:var(--font-serif); font-size:1rem; font-weight:600; }
+.progress-track { height:5px; background:var(--border); border-radius:10px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:10px; transition:width .5s cubic-bezier(.4,0,.2,1),background .5s; }
+
+/* ── MONTH TABS ── */
+.month-tabs { display:flex; gap:7px; padding:14px 16px 0; }
+.month-tab {
+  flex:1; padding:9px 4px; border-radius:10px;
+  border:1.5px solid transparent; font-size:.72rem; font-weight:600;
+  text-align:center; cursor:pointer; transition:all .2s; line-height:1.3;
+}
+.month-tab.m1 { background:var(--m1l); color:var(--m1); }
+.month-tab.m2 { background:var(--m2l); color:var(--m2); }
+.month-tab.m3 { background:var(--m3l); color:var(--m3); }
+.month-tab.active.m1 { background:var(--m1d); color:white; border-color:var(--m1d); box-shadow:0 2px 8px rgba(42,92,66,.3); }
+.month-tab.active.m2 { background:var(--m2d); color:white; border-color:var(--m2d); box-shadow:0 2px 8px rgba(139,69,19,.3); }
+.month-tab.active.m3 { background:var(--m3d); color:white; border-color:var(--m3d); box-shadow:0 2px 8px rgba(74,40,120,.3); }
+
+/* ── DAY NAV ── */
+.day-nav { display:flex; align-items:center; gap:12px; padding:16px 16px 0; }
+.nav-btn {
+  width:42px; height:42px; border-radius:50%; border:1.5px solid var(--border);
+  background:var(--white); font-size:1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .15s; flex-shrink:0; box-shadow:0 1px 4px var(--shadow);
+}
+.nav-btn:hover:not(:disabled) { border-color:#999; transform:scale(1.04); }
+.nav-btn:disabled { opacity:.3; cursor:default; }
+.day-info { flex:1; text-align:center; }
+.day-number { font-family:var(--font-serif); font-size:2.4rem; font-weight:600; line-height:1; letter-spacing:-.02em; }
+.day-sublabel { font-size:.72rem; color:var(--muted); margin-top:2px; }
+
+.day-jump { display:flex; align-items:center; gap:7px; padding:8px 16px 0; }
+.day-jump label { font-size:.73rem; color:var(--muted); white-space:nowrap; }
+.day-jump input {
+  width:64px; padding:6px 10px; border:1.5px solid var(--border);
+  border-radius:8px; font-family:var(--font-sans); font-size:.82rem;
+  background:var(--white); text-align:center;
+}
+.day-jump input:focus { outline:none; border-color:#999; }
+.day-jump button {
+  padding:6px 14px; border-radius:8px; border:none;
+  font-size:.73rem; font-weight:600; font-family:var(--font-sans);
+  cursor:pointer; background:var(--m1); color:white; transition:background .15s;
+}
+.day-jump button:hover { background:var(--m1b); }
+
+/* ── BANNERS ── */
+.phase-banner {
+  margin:12px 16px 0; padding:10px 14px; border-radius:10px;
+  font-size:.79rem; font-weight:500; display:flex; align-items:center; gap:7px;
+  border:1px solid transparent;
+}
+.phase-banner.m1 { background:var(--m1l); color:var(--m1d); border-color:rgba(42,92,66,.18); }
+.phase-banner.m2 { background:var(--m2l); color:var(--m2d); border-color:rgba(139,69,19,.18); }
+.phase-banner.m3 { background:var(--m3l); color:var(--m3d); border-color:rgba(74,40,120,.18); }
+
+.seed-banner {
+  margin:7px 16px 0; padding:9px 14px; border-radius:10px; font-size:.76rem;
+  background:var(--gold-l); border:1px solid rgba(200,168,75,.4);
+  color:#6b4f1a; display:flex; align-items:center; gap:6px;
+}
+
+/* ── SUMMARY ── */
+.summary-bar {
+  margin:12px 16px 0; padding:13px 16px;
+  background:var(--white); border:1px solid var(--border);
+  border-radius:14px; display:flex; align-items:center; gap:12px;
+  box-shadow:0 1px 6px var(--shadow);
+}
+.summary-left { flex:1; }
+.summary-left strong { font-size:.9rem; }
+.summary-left p { font-size:.74rem; color:var(--muted); margin-top:1px; }
+.meal-progress-dots { display:flex; gap:5px; margin-top:7px; }
+.dot { width:8px; height:8px; border-radius:50%; background:var(--border); transition:background .2s,transform .15s; }
+.dot.filled { background:var(--m1b); transform:scale(1.1); }
+.checked-count-wrap { text-align:center; }
+.checked-count { font-family:var(--font-serif); font-size:1.7rem; font-weight:600; color:var(--m1); line-height:1; }
+.checked-label { font-size:.62rem; color:var(--muted); margin-top:1px; }
+
+/* ── DAILY TIP ── */
+.daily-tip {
+  margin:10px 16px 0; padding:12px 14px;
+  background:var(--white); border:1px solid var(--border);
+  border-radius:12px; font-size:.81rem; color:#555; line-height:1.55;
+  box-shadow:0 1px 4px var(--shadow);
+}
+.daily-tip strong { color:var(--m1); display:block; margin-bottom:4px; font-size:.7rem; text-transform:uppercase; letter-spacing:1px; }
+
+/* ── MEAL CARDS ── */
+.meals-wrap { padding:12px 16px 24px; display:flex; flex-direction:column; gap:9px; }
+.meal-card {
+  background:var(--white); border:1px solid var(--border);
+  border-radius:14px; overflow:hidden;
+  box-shadow:0 1px 6px var(--shadow); transition:box-shadow .2s;
+}
+.meal-card:hover { box-shadow:0 3px 14px rgba(0,0,0,.09); }
+.meal-card.completed { border-color:rgba(42,122,79,.3); }
+.meal-card.completed .meal-head { opacity:.65; }
+
+.meal-head {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 14px; cursor:pointer; user-select:none;
+}
+.meal-icon { font-size:1.25rem; flex-shrink:0; }
+.meal-title { font-weight:600; font-size:.87rem; flex:1; }
+.meal-time { font-size:.7rem; color:var(--muted); flex-shrink:0; }
+.chevron { font-size:.7rem; color:var(--subtle); transition:transform .2s; flex-shrink:0; margin-left:4px; }
+.chevron.open { transform:rotate(90deg); }
+.check-btn {
+  width:28px; height:28px; border-radius:50%; border:2px solid var(--border);
+  background:transparent; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; font-size:.8rem; flex-shrink:0; transition:all .2s;
+}
+.check-btn:hover { border-color:var(--m1b); }
+.check-btn.checked { background:var(--m1); border-color:var(--m1); color:white; }
+
+.meal-body {
+  padding:0 14px 13px; font-size:.83rem; color:#444; line-height:1.62;
+  border-top:1px solid #f2ede6; animation:slideDown .18s ease;
+}
+@keyframes slideDown {
+  from { opacity:0; transform:translateY(-4px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.meal-note { margin-top:8px; font-size:.73rem; color:var(--muted); font-style:italic; padding-left:8px; border-left:2px solid var(--border); }
+.where-tag { display:inline-block; margin-top:9px; background:var(--m1l); color:var(--m1); border-radius:6px; padding:3px 10px; font-size:.7rem; font-weight:600; }
+
+/* ── STREAK ── */
+.streak-bar {
+  margin:0 16px 12px; padding:11px 14px;
+  background:linear-gradient(135deg,var(--m1d),var(--m1b));
+  border-radius:12px; display:flex; align-items:center; gap:10px; color:white;
+}
+.streak-emoji { font-size:1.5rem; }
+.streak-text { flex:1; }
+.streak-text strong { display:block; font-size:.9rem; }
+.streak-text span { font-size:.73rem; opacity:.75; }
+.streak-num { font-family:var(--font-serif); font-size:2rem; font-weight:600; line-height:1; }
+.streak-num-label { font-size:.62rem; opacity:.7; text-align:center; }
+
+/* ── FOOTER ── */
+.footer-note {
+  text-align:center; padding:20px 20px 32px;
+  font-size:.72rem; color:var(--subtle);
+  border-top:1px solid var(--border); margin-top:8px; line-height:1.7;
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:#1e1e1e; color:white; padding:10px 20px; border-radius:30px;
+  font-size:.8rem; font-weight:500; z-index:1000;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,.3); pointer-events:none;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+@keyframes confettiFall {
+  0% { transform:translateY(-10px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(80px) rotate(360deg); opacity:0; }
+}
+.confetti-piece {
+  position:fixed; width:8px; height:8px; border-radius:2px;
+  pointer-events:none; z-index:999; animation:confettiFall .8s ease forwards;
+}
+</style>
+</head>
+<body>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="install-banner">
+  <span>📲</span>
+  <div class="install-banner-text">
+    <strong>Add to Home Screen</strong>
+    Get reminders even when browser is closed
+  </div>
+  <button class="install-btn" onclick="installPWA()">Install</button>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>Rufaro's Diet Plan</h1>
+</div>
+
+<!-- NOTIFICATION BANNER -->
+<div class="notif-banner off" id="notif-banner" onclick="handleNotifClick()">
+  <span class="notif-banner-icon">🔔</span>
+  <div class="notif-banner-text">
+    <strong id="notif-title">Enable daily meal reminders</strong>
+    <span id="notif-sub">Get notified at breakfast, lunch &amp; dinner</span>
+  </div>
+  <button class="notif-toggle-btn" id="notif-btn">Enable</button>
+</div>
+
+<div class="notif-times" id="notif-times">
+  <div class="notif-time-pill active" id="pill-breakfast" onclick="toggleTimePill('breakfast')">
+    🌅 <input type="time" id="time-breakfast" value="06:30" onclick="event.stopPropagation()" onchange="saveAndReschedule()">
+  </div>
+  <div class="notif-time-pill active" id="pill-lunch" onclick="toggleTimePill('lunch')">
+    ☀️ <input type="time" id="time-lunch" value="12:30" onclick="event.stopPropagation()" onchange="saveAndReschedule()">
+  </div>
+  <div class="notif-time-pill active" id="pill-dinner" onclick="toggleTimePill('dinner')">
+    🌙 <input type="time" id="time-dinner" value="18:30" onclick="event.stopPropagation()" onchange="saveAndReschedule()">
+  </div>
+  <div class="notif-time-pill" id="pill-snack" onclick="toggleTimePill('snack')">
+    🌤️ <input type="time" id="time-snack" value="15:30" onclick="event.stopPropagation()" onchange="saveAndReschedule()">
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span class="progress-label" id="prog-label">Day 1 of 90</span>
+    <span class="progress-pct" id="prog-pct">1%</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="prog-fill" style="width:1%"></div>
+  </div>
+</div>
+
+<!-- MONTH TABS -->
+<div class="month-tabs">
+  <div class="month-tab m1 active" id="tab-1" onclick="goToMonth(1)">Month 1<br><span style="font-weight:300;font-size:.66rem">Reset &amp; Detox</span></div>
+  <div class="month-tab m2" id="tab-2" onclick="goToMonth(2)">Month 2<br><span style="font-weight:300;font-size:.66rem">Rebalancing</span></div>
+  <div class="month-tab m3" id="tab-3" onclick="goToMonth(3)">Month 3<br><span style="font-weight:300;font-size:.66rem">Consolidation</span></div>
+</div>
+
+<!-- DAY NAV -->
+<div class="day-nav">
+  <button class="nav-btn" id="btn-prev" onclick="changeDay(-1)">◀</button>
+  <div class="day-info">
+    <div class="day-number" id="day-number">Day 1</div>
+    <div class="day-sublabel" id="day-sublabel">Monday · Week 1</div>
+  </div>
+  <button class="nav-btn" id="btn-next" onclick="changeDay(1)">▶</button>
+</div>
+
+<div class="day-jump">
+  <label>Jump to day:</label>
+  <input type="number" id="jump-input" min="1" max="90" placeholder="1–90">
+  <button onclick="jumpToDay()">Go</button>
+</div>
+
+<div class="phase-banner m1" id="phase-banner">🌿 Month 1 — Reset &amp; Detox</div>
+<div class="seed-banner" id="seed-banner" style="display:none">🌰 Seed Cycling: <span id="seed-text"></span></div>
+<div class="daily-tip"><strong>💧 Daily Ritual</strong><span id="daily-tip-text"></span></div>
+
+<div class="summary-bar">
+  <div class="summary-left">
+    <strong>Today's meals</strong>
+    <p>Tap to expand · Tick ✓ when done</p>
+    <div class="meal-progress-dots" id="meal-dots"></div>
+  </div>
+  <div class="checked-count-wrap">
+    <div class="checked-count" id="checked-count">0/6</div>
+    <div class="checked-label">done</div>
+  </div>
+</div>
+
+<div class="meals-wrap" id="meals-wrap"></div>
+
+<div class="streak-bar" id="streak-bar" style="display:none">
+  <span class="streak-emoji">🔥</span>
+  <div class="streak-text">
+    <strong>Current streak</strong>
+    <span>Days with all meals completed</span>
+  </div>
+  <div>
+    <div class="streak-num" id="streak-num">0</div>
+    <div class="streak-num-label">days</div>
+  </div>
+</div>
+
+<div class="footer-note">Made with Love by baba Maari 💚</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── MEAL DATA ──────────────────────────────────────────────────────────
+const MEALS_M1 = [
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Jungle Oats (no sugar) with sliced banana, a handful of groundnuts, and a pinch of cinnamon. Warm lemon water on the side.', note:'Buy oats at OK/TM. Lemons at any roadside vendor or Mbare.', where:'OK Zimbabwe · Mbare Musika' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'1 guava or orange + ginger tea: boil fresh ginger slices in water for 5 mins, no sugar.', note:'Fresh ginger from Mbare or roadside vendors — buy a big piece, lasts 2 weeks in the fridge.', where:'Mbare Musika · Roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Grilled or boiled bream or tilapia + small millet or brown rice portion + steamed covo with garlic + tomato and onion salad with a drizzle of cooking oil.', note:'Millet is preferred over brown rice — lower GI and more fibre.', where:'Mbare Musika · Fish vendors' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Boiled sweet potato (medium size) OR sliced pawpaw. Nothing fried or sugary.', where:'Roadside vendors · Mbare Musika' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Chicken stew — boiled, not fried — with turmeric (½ tsp), garlic, onions, tomatoes. Serve with steamed butternut or pumpkin. Small sadza portion only if needed.', note:'Skip sadza at dinner where possible — have extra vegetables instead.', where:'Supermarkets · Mbare Musika' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Spearmint tea or ginger-turmeric tea. No sugar. Boil ½ tsp turmeric + ginger slices in water, add a squeeze of lemon.', note:'Spearmint tea available at Woolworths or Clicks. Strong hormone-balancing benefit.', where:'Clicks · Woolworths Food' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'2–3 boiled eggs with steamed rape or spinach, half an avocado, and a sprinkle of salt. Warm lemon water.', where:'Roadside vendors · Mbare Musika' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'A handful of groundnuts + 1 orange or guava. Drink a glass of water.', where:'Any local market or supermarket' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Kapenta (matemba) stew with tomatoes, onion, garlic + steamed covo + small portion of millet or sorghum sadza.', note:'Kapenta is one of the best omega-3 sources available locally at very low cost.', where:'Mbare Musika · Choppies · TM Pick n Pay' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt (unsweetened) — good probiotic source. Add sliced banana if desired.', where:'OK · TM · SPAR' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Sugar bean or cowpea stew with garlic, turmeric, tomatoes, onions. Serve with small brown rice portion + steamed rape with a drizzle of oil.', where:'Mbare Musika · Any supermarket' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Chamomile tea or plain warm water. Rest and sleep before 10pm.', where:'Clicks · Woolworths · health stores' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Oats with grated carrot, a handful of groundnuts, and sliced banana. Sweeten only with a tiny drizzle of honey if needed.', where:'OK Zimbabwe · TM Pick n Pay' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Pawpaw (½ medium) + spearmint or ginger tea.', note:'Pawpaw is rich in Vitamin C and digestive enzymes — great for reducing inflammation.', where:'Roadside vendors — very affordable in season' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Boiled or grilled chicken (no skin) with roasted sweet potato + steamed spinach with garlic and tomatoes.', where:'Choppies · Mbare Musika' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'2 boiled eggs OR a small portion of boiled groundnuts.', where:'Available everywhere' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Bone broth soup (boil beef or chicken bones for 2+ hrs with ginger, garlic, onion) + steamed covo + butternut. Light and nourishing.', note:'Make a big batch of bone broth and refrigerate for 3–4 days. Excellent for gut lining.', where:'Butcheries · local markets for bones' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Turmeric-ginger tea: ½ tsp turmeric + sliced ginger boiled in water + squeeze of lemon. No sugar.', where:'Ginger from Mbare; turmeric powder from any supermarket' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Scrambled eggs (2–3) with diced tomato, onion, and spinach. Cooked in a small amount of cooking oil. Warm lemon water.', where:'Mbare Musika for vegetables; eggs from any vendor' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Sliced banana + ginger tea. OR a handful of pumpkin seeds.', note:'Pumpkin seeds are rich in zinc and magnesium. Available at TM, SPAR, and health stores.', where:'TM Pick n Pay · SPAR · Nu-Vita' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Lentil soup with carrots, tomatoes, garlic, onion, and ½ tsp turmeric. Serve with small millet portion and steamed covo.', where:'OK · TM · Choppies — lentils widely available' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Orange + a few groundnuts. Vitamin C and healthy fat combo.', where:'Roadside vendors everywhere' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Stir-fried vegetables (covo, carrots, onion, garlic) with tofu or boiled egg. Small sadza if needed.', where:'OK · SPAR for tofu; Mbare for vegetables' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Ginger tea. Write down one thing that went well today.', where:'Ginger from Mbare; dried ginger from supermarkets' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Mahewu (unsweetened, homemade or bought) + 2 boiled eggs. Traditional and gut-friendly.', note:'Ensure mahewu has no added sugar. Homemade is best.', where:'Local vendors · Choppies · TM' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Guava + ginger tea.', where:'Roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Fish (bream or tilapia) curry: fish + coconut milk + turmeric + garlic + tomatoes + onion. Serve with small millet or sorghum.', note:'Coconut milk at OK, TM, SPAR. Adds anti-inflammatory lauric acid.', where:'Fish vendors · Mbare; coconut milk at OK/SPAR' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt (unsweetened) with a sprinkle of cinnamon.', where:'OK · TM · SPAR' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Pumpkin and lentil stew with garlic and coriander. Steamed rape on the side. No sadza.', where:'Mbare for pumpkin; OK/TM for lentils' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Spearmint tea × 2 cups. Spearmint is proven to reduce androgen levels.', where:'Clicks · Woolworths Food · health stores' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Weekend smoothie: banana + spinach + pawpaw + plain yoghurt + ginger + water. Blend and enjoy slowly.', where:'Mbare for produce; yoghurt at OK/TM' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Second smoothie portion OR orange + groundnuts.', where:'Roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Full weekend meal: grilled bream OR chicken + roasted beetroot, sweet potato, butternut + steamed covo + beetroot salad.', where:'Fish vendors / butcheries · Mbare' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Boiled sweet potato + a cup of ginger tea.', where:'Roadside vendors; ginger from Mbare' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Kapenta with steamed covo and garlic + tomato salad + small millet sadza. Keep it clean.', where:'Choppies · Mbare · OK' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Chamomile tea. Rest. Reflect. You have shown up for her health every day this week.', where:'Clicks · Woolworths · health stores' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Oats with pumpkin seeds, banana, cinnamon. Warm lemon water. Weekend — take it slow.', where:'OK · TM' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Full fruit bowl: pawpaw + guava + orange. Vitamin C powerhouse.', where:'Mbare · roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Full weekend meal: grilled bream OR chicken + roasted beetroot, sweet potato, butternut + steamed covo + beetroot salad. Celebrate consistency!', where:'Fish vendors / butcheries · Mbare' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Mahewu (unsweetened) + banana.', where:'Local markets · supermarkets' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Lentil stew with turmeric, garlic, spinach, butternut + small millet. Light and clean.', where:'OK · TM · already prepped' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Chamomile tea. Rest. Reflect. You have done something wonderful for her health.', where:'Clicks · Woolworths · health stores' },
+  ],
+];
+
+const MEALS_M2 = [
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Oats with 2 tbsp pumpkin seeds, banana, and cinnamon. Warm lemon water first.', note:'Pumpkin seeds are non-negotiable in Month 2 — zinc and progesterone support.', where:'OK · TM; pumpkin seeds from SPAR or Nu-Vita' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Spearmint tea (first of two cups today) + orange or guava.', note:'Two full cups of spearmint tea daily — target this every day in Month 2.', where:'Clicks · Woolworths Food' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Tilapia with steamed covo + roasted sweet potato + tomato/onion salad with lemon dressing.', where:'Fish vendors · Mbare Musika' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt (unsweetened) + banana. Yoghurt manages estrogen reabsorption through gut health.', where:'OK · TM · SPAR' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Lentil stew with turmeric, garlic, tomatoes, spinach. No sadza. Small millet if needed.', where:'OK · TM · Choppies' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Second cup of spearmint tea. Track your cycle phase today — it guides seed cycling.', where:'Clicks · Woolworths' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Smoothie: banana + spinach + pawpaw + yoghurt + turmeric + ginger. Add 2 tbsp pumpkin or sesame seeds depending on cycle phase.', where:'Mbare for produce; seeds at SPAR/Nu-Vita' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Guava + groundnuts.', where:'Roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Kapenta with steamed rape and garlic + roasted butternut + tomato relish + small millet.', where:'Mbare · Choppies · OK' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'2 boiled eggs + a glass of water.', where:'Available everywhere' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Chicken stew (boiled) with turmeric, garlic, tomatoes + steamed covo + butternut. No sadza.', where:'Choppies · Butcheries' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Spearmint tea × 2. Sleep before 10pm.', where:'Clicks · Woolworths' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Boiled eggs (2–3) + steamed spinach + half avocado. Warm lemon water.', where:'Mbare Musika for greens; avocado from vendors' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Pawpaw + spearmint tea (cup 1).', where:'Roadside vendors; tea from Clicks' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Sugar bean stew with turmeric, garlic, tomatoes + steamed covo + small brown rice. High fibre.', where:'OK · TM; beans very affordable at Mbare' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt with cinnamon.', where:'Any supermarket' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Grilled tilapia + roasted pumpkin + steamed rape with garlic.', where:'Fish vendors · Mbare' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Spearmint tea (cup 2). Consider castor oil pack on lower abdomen for 45 mins if comfortable.', where:'Clicks · Woolworths' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Oats with sesame or pumpkin seeds (2 tbsp per cycle phase) + banana + ginger tea.', where:'OK · TM; seeds at SPAR/Food Lovers' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Orange + groundnuts. Vitamin C + healthy fat.', where:'Roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Bone broth soup with vegetables (covo, butternut, garlic, ginger) + boiled chicken.', where:'Butcheries for bones; Mbare for veg' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Boiled sweet potato.', where:'Roadside vendors' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Lentil and vegetable curry with turmeric, garlic, coconut milk. Steamed rape on the side.', where:'OK · TM; coconut milk at SPAR' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Chamomile tea. Sleep target: 8 hours.', where:'Clicks · Woolworths · health stores' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Scrambled eggs with tomato, onion, spinach + warm lemon water.', where:'Mbare for veg; eggs from any vendor' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Spearmint tea (cup 1) + guava.', where:'Clicks · roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Kapenta with steamed covo + small millet + tomato and onion salad.', where:'Mbare · Choppies' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt + sliced banana.', where:'Any supermarket' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Baked chicken thighs with turmeric, garlic, ginger rub + roasted pumpkin + steamed rape.', where:'Choppies · Butcheries · Mbare' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Spearmint tea × 2. Track your cycle today: note where you are for seed cycling.', where:'Clicks · Woolworths' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Smoothie: banana + spinach + guava + yoghurt + turmeric + ginger. Add seeds per cycle phase.', where:'Mbare for produce; yoghurt at OK/TM' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Guava + pumpkin seeds (2 tbsp).', where:'Roadside vendors; pumpkin seeds at SPAR/Nu-Vita' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Kapenta with brown rice (small portion) + steamed covo + raw tomato and onion salad.', where:'Mbare · Choppies' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt + sliced banana.', where:'Any supermarket' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Bone broth + boiled chicken pieces + steamed butternut and rape.', where:'Butcheries for bones; Mbare for veg' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Chamomile tea for a restful night. 8 hours sleep target.', where:'Clicks · Woolworths · health stores' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Oats with pumpkin seeds, banana, cinnamon. Warm lemon water. Weekend — rest and restore.', where:'OK · TM' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Full fruit bowl: pawpaw + guava + orange.', where:'Mbare · roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Weekend feast: grilled bream + roasted beetroot, sweet potato, butternut + steamed covo. Celebrate two months in!', where:'Fish vendors / butcheries · Mbare' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Mahewu (unsweetened) + banana.', where:'Local markets · supermarkets' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Lentil stew with turmeric, garlic, spinach, butternut + small millet. Light and clean.', where:'OK · TM · already prepped' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Chamomile tea. Rest. Reflect. You have done something wonderful for her health.', where:'Clicks · Woolworths · health stores' },
+  ],
+];
+
+const MEALS_M3 = [
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Oats with banana, pumpkin seeds (2 tbsp), and ginger tea. Warm lemon water first.', note:'Month 3 — maintain and consolidate. No new restrictions, just consistency.', where:'OK · TM; ginger from Mbare' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Guava + orange OR pawpaw + a handful of groundnuts.', where:'Roadside vendors — very affordable' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Bream or kapenta + steamed covo + millet + beetroot salad. Beetroot supports liver detox.', note:'Beetroot available at Mbare and most supermarkets. Buy fresh, not canned.', where:'Mbare Musika · Choppies · OK' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt + banana. OR boiled sweet potato.', where:'Any supermarket or vendor' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Grilled chicken + roasted butternut and sweet potato + steamed spinach with garlic. No sadza.', where:'Choppies · Butcheries · Mbare' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Spearmint or ginger-turmeric tea. Continue seed cycling — track cycle phase.', where:'Clicks · Woolworths' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Smoothie: spinach + banana + pawpaw + yoghurt + turmeric + ginger. Add 2 tbsp seeds depending on cycle phase.', where:'Mbare for produce; sesame seeds at SPAR/Food Lovers' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Sliced oranges + groundnuts.', where:'Any vendor' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Lentil and vegetable stew with turmeric, garlic, butternut, spinach + small brown rice.', where:'OK · TM · Choppies' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Boiled eggs (2) + a glass of water.', where:'Available everywhere' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Tilapia with steamed covo, roasted beetroot and sweet potato. Light and nourishing.', where:'Fish vendors · Mbare' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Chamomile tea. Reflect: compare energy and pain levels to Month 1, Week 1.', where:'Clicks · Woolworths' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Scrambled eggs with tomato, spinach, onion + half avocado + warm lemon water.', where:'Mbare; avocado from roadside vendors when in season' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Pawpaw + pumpkin or sesame seeds (2 tbsp) depending on cycle phase.', where:'Roadside vendors; seeds at SPAR/Nu-Vita' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Kapenta with steamed covo and garlic + roasted butternut + tomato/onion relish + millet.', where:'Mbare · Choppies · OK' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Mahewu (unsweetened) + banana. Great probiotic combination.', where:'Local markets · supermarkets' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Chicken and vegetable soup: chicken, carrots, covo, garlic, ginger, turmeric. Clear and healing.', where:'Butcheries · Mbare' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Spearmint tea — 2 cups. 3rd month strong 💪', where:'Clicks · Woolworths' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Oats with sliced avocado on the side + banana + ginger tea + warm lemon water.', where:'OK · SPAR; avocado from vendors' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Guava + groundnuts.', where:'Roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Sugar bean stew with turmeric, garlic, tomatoes + steamed rape + beetroot salad + small millet portion.', where:'Mbare · OK · TM' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt + banana. OR boiled sweet potato.', where:'Any supermarket' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Grilled bream + roasted pumpkin and sweet potato + steamed spinach with garlic. No sadza tonight.', where:'Fish vendors · Mbare' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Turmeric-ginger tea. Sleep before 10pm — your body does its healing overnight.', where:'Ginger at Mbare; turmeric at any supermarket' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Smoothie: banana + spinach + guava + yoghurt + turmeric + ginger. Thick and nutrient-dense.', where:'Mbare for produce; yoghurt at OK/TM' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Pumpkin or sesame seeds (2 tbsp) + orange (per cycle phase for seed cycling).', where:'SPAR · Nu-Vita · Food Lovers Market' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Kapenta + steamed covo + roasted beetroot + millet. Keep the turmeric in — it stays every day.', where:'Choppies · Mbare · OK' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Boiled eggs + a glass of lemon water.', where:'Available everywhere' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Batch-cooked lentil stew + steamed butternut + rape. Month 3 is about making this lifestyle feel effortless.', where:'Already prepped — just reheat' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Spearmint tea. Final month — stay consistent.', where:'Clicks · Woolworths' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'2–3 boiled eggs + steamed spinach + half avocado. High protein, healthy fat start.', where:'Mbare; avocado from roadside vendors' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Pawpaw + guava + a small handful of groundnuts.', where:'Roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Grilled tilapia + steamed rape with garlic + roasted sweet potato + tomato/onion salad.', where:'Fish vendors · Mbare Musika' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Plain yoghurt + banana + a sprinkle of cinnamon.', where:'OK · TM · SPAR' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Bone broth soup with boiled chicken, butternut, covo, garlic, turmeric. Deeply nourishing final week meal.', where:'Butcheries · Mbare' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Ginger-turmeric tea. Book that follow-up ultrasound if not already done.', where:'Ginger at Mbare; turmeric at any supermarket' },
+  ],
+  [
+    { icon:'🌅', title:'Breakfast', time:'6:30–8:00am', body:'Oats with pumpkin seeds, banana, cinnamon. Warm lemon water. Final weekend — celebrate!', where:'OK · TM' },
+    { icon:'☀️', title:'Mid-Morning Snack', time:'10:00–10:30am', body:'Full fruit bowl: pawpaw + guava + orange. Vitamin C powerhouse.', where:'Mbare · roadside vendors' },
+    { icon:'🍽️', title:'Lunch', time:'12:30–1:30pm', body:'Day 90 celebration meal: grilled bream OR chicken + roasted beetroot, sweet potato, butternut + steamed covo. You made it!', where:'Fish vendors / butcheries · Mbare' },
+    { icon:'🌤️', title:'Afternoon Snack', time:'3:30–4:00pm', body:'Mahewu (unsweetened) + banana.', where:'Local markets · supermarkets' },
+    { icon:'🌙', title:'Dinner', time:'6:30–7:30pm', body:'Lentil stew with turmeric, garlic, spinach, butternut + small millet. This is your lifestyle now.', where:'OK · TM · already prepped' },
+    { icon:'🍵', title:'Evening Drink', time:'8:00–9:00pm', body:'Chamomile tea. 90 days. You did something extraordinary. 🌿', where:'Clicks · Woolworths · health stores' },
+  ],
+];
+
+const TIPS_M1 = [
+  'Start with warm lemon water on empty stomach. Aim for 2–2.5L water today.',
+  'No sugar in tea or coffee today. Try spearmint tea instead.',
+  'Add ½ tsp turmeric to your cooking — it should feature in at least one meal every day.',
+  'Fresh ginger from Mbare lasts 2 weeks in the fridge. Buy a big piece this week.',
+  'Avoid sadza at dinner tonight — double the vegetable portion instead.',
+  'Batch cook sugar beans or lentils today for easy lunches this week.',
+  'Rest day focus: 7–9 hours sleep. Melatonin during sleep directly supports ovarian health.',
+];
+const TIPS_M2 = [
+  'Pumpkin seeds daily (2 tbsp) — non-negotiable in Month 2 for zinc and progesterone support.',
+  'Spearmint tea goal: 2 full cups today. Set a reminder for evening.',
+  'Track your cycle phase today to guide seed cycling (pumpkin Days 1–14 / sesame Days 15–28).',
+  'Plain unsweetened yoghurt at least once today — gut health manages estrogen reabsorption.',
+  'No alcohol, no processed meats, no fizzy drinks. Your body is rebalancing.',
+  'Batch cook a big pot of lentil or bean stew to last 3–4 days.',
+  'Rest day: sleep before 10pm. Castor oil pack on lower abdomen for 45 mins if comfortable.',
+];
+const TIPS_M3 = [
+  'Month 3 — consolidation. The goal is making this feel effortless, not restrictive.',
+  'Seed cycling: confirm which phase of your cycle you\'re in and pick seeds accordingly.',
+  'Try a 12-hour eating window today (e.g. 7am–7pm). Let the gut rest overnight.',
+  'Beetroot in at least one meal this week — excellent for liver detox support.',
+  'Book a follow-up ultrasound if not already scheduled — 3-month comparison is important.',
+  'Batch cook on the weekend: lentils, bone broth, and roasted vegetables for the week.',
+  'Celebrate consistency today. 3 months of this is a serious investment in her health.',
+];
+
+const PHASES = [
+  { label:'Month 1 — Reset & Detox', cls:'m1' },
+  { label:'Month 2 — Hormonal Rebalancing', cls:'m2' },
+  { label:'Month 3 — Consolidation', cls:'m3' },
+];
+const WEEK_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+// ─── STATE ──────────────────────────────────────────────────────────────
+let currentDay = 1;
+let checked = {};
+let notifEnabled = false;
+let activePills = { breakfast:true, lunch:true, dinner:true, snack:false };
+let swRegistration = null;
+let deferredInstallPrompt = null;
+
+// ─── SERVICE WORKER ─────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      swRegistration = await navigator.serviceWorker.register('/sw.js');
+      console.log('SW registered');
+    } catch(e) {
+      console.warn('SW registration failed:', e);
+    }
+  });
+}
+
+// ─── PWA INSTALL ────────────────────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('install-banner').classList.add('visible');
+});
+
+function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(r => {
+    if (r.outcome === 'accepted') {
+      document.getElementById('install-banner').classList.remove('visible');
+      showToast('✅ App installed! Open from your home screen.');
+    }
+    deferredInstallPrompt = null;
+  });
+}
+
+// ─── STORAGE ────────────────────────────────────────────────────────────
+function saveState() {
+  try {
+    localStorage.setItem('rufaro_diet_v1', JSON.stringify({
+      currentDay,
+      checked: Object.fromEntries(Object.entries(checked).map(([k,v]) => [k,[...v]])),
+      notifEnabled,
+      activePills,
+      notifTimes: {
+        breakfast: document.getElementById('time-breakfast')?.value || '06:30',
+        lunch:     document.getElementById('time-lunch')?.value     || '12:30',
+        dinner:    document.getElementById('time-dinner')?.value    || '18:30',
+        snack:     document.getElementById('time-snack')?.value     || '15:30',
+      }
+    }));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('rufaro_diet_v1');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    currentDay    = d.currentDay || 1;
+    notifEnabled  = d.notifEnabled || false;
+    if (d.activePills) activePills = d.activePills;
+    checked = {};
+    for (const [k,v] of Object.entries(d.checked || {})) checked[k] = new Set(v);
+    if (d.notifTimes) {
+      setTimeout(() => {
+        ['breakfast','lunch','dinner','snack'].forEach(k => {
+          const el = document.getElementById('time-'+k);
+          if (el && d.notifTimes[k]) el.value = d.notifTimes[k];
+        });
+      }, 0);
+    }
+  } catch(e) {}
+}
+
+// ─── NOTIFICATIONS ───────────────────────────────────────────────────────
+function updateNotifUI() {
+  const banner = document.getElementById('notif-banner');
+  const btn    = document.getElementById('notif-btn');
+  const title  = document.getElementById('notif-title');
+  const sub    = document.getElementById('notif-sub');
+  const times  = document.getElementById('notif-times');
+
+  if (!('Notification' in window)) {
+    banner.className = 'notif-banner denied';
+    title.textContent = 'Notifications not supported';
+    sub.textContent = 'Your browser does not support notifications';
+    btn.textContent = 'N/A';
+    return;
+  }
+
+  if (Notification.permission === 'denied') {
+    banner.className = 'notif-banner denied';
+    title.textContent = 'Notifications blocked';
+    sub.textContent = 'Go to browser Settings → Site Settings → Notifications to allow';
+    btn.textContent = 'Blocked';
+    times.classList.remove('visible');
+    return;
+  }
+
+  if (notifEnabled && Notification.permission === 'granted') {
+    banner.className = 'notif-banner on';
+    title.textContent = 'Meal reminders active 🔔';
+    sub.textContent = 'Tap times below to adjust. Install app for background alerts.';
+    btn.textContent = 'Disable';
+    times.classList.add('visible');
+    ['breakfast','lunch','dinner','snack'].forEach(k => {
+      document.getElementById('pill-'+k).classList.toggle('active', !!activePills[k]);
+    });
+  } else {
+    banner.className = 'notif-banner off';
+    title.textContent = 'Enable daily meal reminders';
+    sub.textContent = 'Get notified at breakfast, lunch & dinner';
+    btn.textContent = 'Enable';
+    times.classList.remove('visible');
+  }
+}
+
+async function handleNotifClick() {
+  if (!('Notification' in window) || Notification.permission === 'denied') return;
+  if (notifEnabled) {
+    notifEnabled = false;
+    // Tell SW to clear alarms
+    sendToSW({ type: 'CLEAR_ALARMS' });
+    showToast('🔕 Reminders disabled');
+  } else {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { updateNotifUI(); return; }
+    notifEnabled = true;
+    scheduleViaServiceWorker();
+    showToast('🔔 Meal reminders enabled!');
+  }
+  updateNotifUI();
+  saveState();
+}
+
+function toggleTimePill(name) {
+  activePills[name] = !activePills[name];
+  document.getElementById('pill-'+name).classList.toggle('active', activePills[name]);
+  scheduleViaServiceWorker();
+  saveState();
+}
+
+function saveAndReschedule() {
+  scheduleViaServiceWorker();
+  saveState();
+}
+
+function sendToSW(msg) {
+  if (swRegistration && swRegistration.active) {
+    swRegistration.active.postMessage(msg);
+  } else if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage(msg);
+  }
+}
+
+function scheduleViaServiceWorker() {
+  if (!notifEnabled || Notification.permission !== 'granted') return;
+
+  const mealConfig = [
+    { key:'breakfast', label:'Breakfast',       emoji:'🌅', body: getMealData(currentDay)[0]?.body?.substring(0,80)+'…' },
+    { key:'lunch',     label:'Lunch',           emoji:'☀️', body: getMealData(currentDay)[2]?.body?.substring(0,80)+'…' },
+    { key:'dinner',    label:'Dinner',          emoji:'🌙', body: getMealData(currentDay)[4]?.body?.substring(0,80)+'…' },
+    { key:'snack',     label:'Afternoon Snack', emoji:'🌤️', body: getMealData(currentDay)[3]?.body?.substring(0,80)+'…' },
+  ];
+
+  const alarms = mealConfig.map(m => ({
+    ...m,
+    time: document.getElementById('time-'+m.key)?.value || '12:00',
+    enabled: !!activePills[m.key],
+  }));
+
+  sendToSW({ type:'SET_ALARMS', alarms, currentDay });
+
+  // Fallback: also schedule in-page timers for when browser is open
+  scheduleInPageTimers(alarms);
+}
+
+// In-page timer fallback (works when tab is open but SW not running)
+let inPageTimers = [];
+function scheduleInPageTimers(alarms) {
+  inPageTimers.forEach(t => clearTimeout(t));
+  inPageTimers = [];
+  const now = Date.now();
+  alarms.forEach(alarm => {
+    if (!alarm.enabled) return;
+    const [h,m] = alarm.time.split(':').map(Number);
+    let target = new Date(); target.setHours(h,m,0,0);
+    if (target.getTime() <= now) target.setDate(target.getDate()+1);
+    const delay = target.getTime() - now;
+    const t = setTimeout(() => {
+      if (Notification.permission === 'granted') {
+        new Notification(`${alarm.emoji} ${alarm.label} — Day ${currentDay}`, {
+          body: alarm.body, tag:'diet-'+alarm.key, renotify:true
+        });
+      }
+      const daily = setInterval(() => {
+        if (Notification.permission === 'granted') {
+          new Notification(`${alarm.emoji} ${alarm.label} — Day ${currentDay}`, {
+            body: alarm.body, tag:'diet-'+alarm.key, renotify:true
+          });
+        }
+      }, 86400000);
+      inPageTimers.push(daily);
+    }, delay);
+    inPageTimers.push(t);
+  });
+}
+
+// ─── DATA HELPERS ────────────────────────────────────────────────────────
+function getMealData(day) {
+  const month   = Math.ceil(day/30);
+  const weekDay = ((day-1)%30)%7;
+  if (month===1) return MEALS_M1[weekDay];
+  if (month===2) return MEALS_M2[weekDay];
+  return MEALS_M3[weekDay];
+}
+function getTip(day) {
+  const month   = Math.ceil(day/30);
+  const weekDay = ((day-1)%7);
+  if (month===1) return TIPS_M1[weekDay];
+  if (month===2) return TIPS_M2[weekDay];
+  return TIPS_M3[weekDay];
+}
+function getCheckedSet() {
+  if (!checked[currentDay]) checked[currentDay] = new Set();
+  return checked[currentDay];
+}
+function countChecked() { return getCheckedSet().size; }
+
+function toggleCheck(mealIdx) {
+  const s = getCheckedSet();
+  if (s.has(mealIdx)) s.delete(mealIdx);
+  else {
+    s.add(mealIdx);
+    if (s.size===6) { spawnConfetti(); showToast('🎉 All meals done today!'); }
+  }
+  updateCheckedCount();
+  renderMeals();
+  updateStreakBar();
+  saveState();
+}
+
+function updateCheckedCount() {
+  document.getElementById('checked-count').textContent = countChecked()+'/6';
+  const c = countChecked();
+  document.getElementById('meal-dots').innerHTML =
+    Array.from({length:6},(_,i)=>`<div class="dot${i<c?' filled':''}"></div>`).join('');
+}
+
+function updateStreakBar() {
+  let streak = 0;
+  for (let d=currentDay; d>=1; d--) {
+    if (checked[d]?.size===6) streak++;
+    else break;
+  }
+  const bar = document.getElementById('streak-bar');
+  bar.style.display = streak>0 ? 'flex' : 'none';
+  if (streak>0) document.getElementById('streak-num').textContent = streak;
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────
+function renderAll() {
+  const day   = currentDay;
+  const month = Math.ceil(day/30);
+  const phase = PHASES[month-1];
+  const pct   = Math.round((day/90)*100);
+  const weekN = Math.ceil(day/7);
+  const dow   = WEEK_DAYS[(day-1)%7];
+
+  document.getElementById('prog-label').textContent = `Day ${day} of 90`;
+  document.getElementById('prog-pct').textContent   = pct+'%';
+  const fill = document.getElementById('prog-fill');
+  fill.style.width      = pct+'%';
+  fill.style.background = month===1?'var(--m1b)':month===2?'var(--m2b)':'var(--m3b)';
+
+  document.getElementById('day-number').textContent   = `Day ${day}`;
+  document.getElementById('day-sublabel').textContent = `${dow} · Week ${weekN}`;
+
+  for (let i=1;i<=3;i++) {
+    document.getElementById('tab-'+i).className =
+      'month-tab m'+i+(i===month?' active':'');
+  }
+
+  const pb = document.getElementById('phase-banner');
+  pb.className   = 'phase-banner '+phase.cls;
+  pb.textContent = ['🌿','🌸','🌟'][month-1]+' '+phase.label;
+
+  const sb = document.getElementById('seed-banner');
+  if (month>=2) {
+    sb.style.display='flex';
+    const dp = ((day-1)%28)+1;
+    document.getElementById('seed-text').textContent =
+      dp<=14 ? 'Days 1–14 → 2 tbsp Pumpkin Seeds (zinc for estrogen phase)'
+             : 'Days 15–28 → 2 tbsp Sesame Seeds (lignans for luteal phase)';
+  } else { sb.style.display='none'; }
+
+  document.getElementById('daily-tip-text').textContent = getTip(day);
+  document.getElementById('btn-prev').disabled = day<=1;
+  document.getElementById('btn-next').disabled = day>=90;
+
+  updateCheckedCount();
+  renderMeals();
+  updateStreakBar();
+}
+
+function renderMeals() {
+  const meals = getMealData(currentDay);
+  const s     = getCheckedSet();
+  document.getElementById('meals-wrap').innerHTML = meals.map((m,i) => {
+    const done = s.has(i);
+    return `
+      <div class="meal-card${done?' completed':''}" id="meal-${i}">
+        <div class="meal-head" onclick="toggleExpand(${i})">
+          <span class="meal-icon">${m.icon}</span>
+          <span class="meal-title">${m.title}</span>
+          <span class="meal-time">${m.time}</span>
+          <span class="chevron" id="chev-${i}">›</span>
+          <button class="check-btn${done?' checked':''}" onclick="event.stopPropagation();toggleCheck(${i})">${done?'✓':''}</button>
+        </div>
+        <div class="meal-body" id="meal-body-${i}" style="display:none">
+          ${m.body}
+          ${m.note?`<div class="meal-note">💡 ${m.note}</div>`:''}
+          ${m.where?`<div class="where-tag">📍 ${m.where}</div>`:''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleExpand(i) {
+  const body = document.getElementById('meal-body-'+i);
+  const chev = document.getElementById('chev-'+i);
+  const open = body.style.display==='none';
+  body.style.display = open?'block':'none';
+  if(chev) chev.classList.toggle('open',open);
+}
+
+function changeDay(delta) {
+  const next = currentDay+delta;
+  if (next<1||next>90) return;
+  currentDay = next;
+  renderAll(); saveState();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goToMonth(m) {
+  currentDay = (m-1)*30+1;
+  renderAll(); saveState();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function jumpToDay() {
+  const val = parseInt(document.getElementById('jump-input').value);
+  if (val>=1&&val<=90) { currentDay=val; renderAll(); saveState(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+// ─── UTILS ──────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function spawnConfetti() {
+  const colors=['#2a5c42','#b5621a','#7c4daa','#c8a84b','#40916c'];
+  for(let i=0;i<20;i++) setTimeout(()=>{
+    const el=document.createElement('div'); el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}vw;top:${20+Math.random()*30}vh;background:${colors[Math.floor(Math.random()*5)]};animation-delay:${Math.random()*.3}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1200);
+  },i*30);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowRight') changeDay(1);
+  if(e.key==='ArrowLeft')  changeDay(-1);
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────
+loadState();
+renderAll();
+updateNotifUI();
+if (notifEnabled && Notification.permission==='granted') {
+  setTimeout(scheduleViaServiceWorker, 1000); // wait for SW to be ready
+}
+</script>
+</body>
+</html>
